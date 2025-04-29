@@ -2,16 +2,16 @@ import requests
 import time
 import pandas as pd
 
-# Ganti dengan API key Anda
-API_KEY = '55d85efd1fa88b65627c3a00796b101c078ad8644ff319156b6ab9da68bc3761'
+# Ganti dengan API key mu
+API_KEY = 'YOUR_VT_API'
 API_URL = 'https://www.virustotal.com/api/v3/domains/'
 
-# Setting
+# SeTIANg
 USE_FREE_API = True
 DELAY_SECONDS = 16 if USE_FREE_API else 1
-REQUEST_TIMEOUT = 60  # Timeout request per domain dalam detik (1 menit)
+REQUEST_TIMEOUT = 60  # coba timeout
 
-# Baca domain dari file
+# Read domain di file
 try:
     with open('input.txt', 'r') as file:
         domains = [line.strip() for line in file if line.strip()]
@@ -60,7 +60,7 @@ for idx, domain in enumerate(domains, start=1):
 
         elif response.status_code == 429:
             print(f"❌ Rate limit exceeded saat cek {domain}. Menghentikan proses dan export hasil...")
-            break  # Hentikan loop kalau dapat 429
+            break  # done klo dapet 429
 
         else:
             try:
@@ -107,8 +107,8 @@ for idx, domain in enumerate(domains, start=1):
 
 # Setelah selesai / break, export ke Excel
 df = pd.DataFrame(results)
-output_file = 'hasil_cek_domain77.xlsx'
+output_file = 'checker_result.xlsx'
 df.to_excel(output_file, index=False)
 
-print(f"\n✅ Pemeriksaan selesai! Hasil disimpan di: {output_file}")
+print(f"\n✅ Checker selesai! Hasil disimpan di: {output_file}")
 
