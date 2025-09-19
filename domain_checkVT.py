@@ -2,34 +2,34 @@ import requests
 import time
 import pandas as pd
 
-# Ganti dengan API key mu
+# Setting API key
 API_KEY = 'YOUR_VT_API'
 API_URL = 'https://www.virustotal.com/api/v3/domains/'
 
-# SeTIANg
+# Setting Req
 USE_FREE_API = True
 DELAY_SECONDS = 16 if USE_FREE_API else 1
-REQUEST_TIMEOUT = 60  # coba timeout
+REQUEST_TIMEOUT = 60  # setting timeout
 
-# Read domain di file
+# Read domain on file
 try:
     with open('input.txt', 'r') as file:
         domains = [line.strip() for line in file if line.strip()]
 except FileNotFoundError:
-    print("❌ File input.txt tidak ditemukan.")
+    print("❌ File input.txt not found.")
     exit(1)
 
 headers = {
     'x-apikey': API_KEY
 }
 
-print(f"Total domain yang akan dicek: {len(domains)}")
-print(f"Mode API: {'FREE' if USE_FREE_API else 'PREMIUM'} (Delay {DELAY_SECONDS} detik per request)\n")
+print(f"Total domain will be check: {len(domains)}")
+print(f"Mode API: {'FREE' if USE_FREE_API else 'PREMIUM'} (Delay {DELAY_SECONDS} second per request)\n")
 
 results = []
 
 for idx, domain in enumerate(domains, start=1):
-    print(f'🔍 [{idx}/{len(domains)}] Memeriksa domain: {domain}')
+    print(f'🔍 [{idx}/{len(domains)}] Checking domain: {domain}')
     try:
         response = requests.get(API_URL + domain, headers=headers, timeout=REQUEST_TIMEOUT)
         if response.status_code == 200:
@@ -56,20 +56,20 @@ for idx, domain in enumerate(domains, start=1):
                 'Reputation Score': reputation_score
             })
 
-            print(f"  ➔ Reputation Score untuk {domain}: {reputation_score}")
+            print(f"  ➔ Reputation Score for {domain}: {reputation_score}")
 
         elif response.status_code == 429:
-            print(f"❌ Rate limit exceeded saat cek {domain}. Menghentikan proses dan export hasil...")
-            break  # done klo dapet 429
+            print(f"❌ Rate limit exceeded when checking {domain}. Stop process and export the result...")
+            break  # done if get 429
 
         else:
             try:
                 error_info = response.json().get('error', {})
                 error_code = error_info.get('code', 'UnknownError')
                 error_message = error_info.get('message', 'No error message provided')
-                print(f"❌ Error saat cek {domain}: {error_code} - {error_message}")
+                print(f"❌ Error when checking {domain}: {error_code} - {error_message}")
             except Exception:
-                print(f"❌ Gagal mendapatkan data untuk {domain}. Status code: {response.status_code}")
+                print(f"❌ Failed get data for {domain}. Status code: {response.status_code}")
 
             results.append({
                 'Domain': domain,
@@ -81,7 +81,7 @@ for idx, domain in enumerate(domains, start=1):
             })
 
     except requests.exceptions.Timeout:
-        print(f"⏰ Timeout saat cek {domain} (> {REQUEST_TIMEOUT} detik), lanjut domain berikutnya...")
+        print(f"⏰ Timeout when checking {domain} (> {REQUEST_TIMEOUT} second), go to next domain...")
         results.append({
             'Domain': domain,
             'Country': 'Timeout',
@@ -92,7 +92,7 @@ for idx, domain in enumerate(domains, start=1):
         })
 
     except Exception as e:
-        print(f"⚠️ Error saat memeriksa {domain}: {e}")
+        print(f"⚠️ Error when checking {domain}: {e}")
         results.append({
             'Domain': domain,
             'Country': 'Error',
@@ -105,10 +105,10 @@ for idx, domain in enumerate(domains, start=1):
     if idx != len(domains):
         time.sleep(DELAY_SECONDS)
 
-# Setelah selesai / break, export ke Excel
+# After done / break, export to Excel
 df = pd.DataFrame(results)
 output_file = 'checker_result.xlsx'
 df.to_excel(output_file, index=False)
 
-print(f"\n✅ Checker selesai! Hasil disimpan di: {output_file}")
+print(f"\n✅ Checking done! Result in: {output_file}")
 
